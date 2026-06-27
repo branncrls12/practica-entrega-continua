@@ -21,8 +21,8 @@ jobs:
     
     - name: Instalar dependencias
       run: |
-        npm install -g htmlhint eslint@8.x
-        npm install -g @eslint/js globals
+        npm install -g htmlhint
+        npm install -g eslint@8.56.0
     
     - name: Validar HTML
       run: |
