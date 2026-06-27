@@ -1,0 +1,105 @@
+name: CI - Validación y Pruebas
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Instalar dependencias
+      run: |
+        npm install -g htmlhint
+        npm install -g eslint@8.56.0
+    
+    - name: Validar HTML
+      run: |
+        npx htmlhint index.html
+    
+    - name: Validar JavaScript con ESLint
+      run: |
+        npx eslint app.js --fix
+    
+    - name: Verificar que todos los archivos existen
+      run: |
+        echo "=== Archivos del proyecto ==="
+        ls -la
+        echo "============================="
+        if [ -f "index.html" ] && [ -f "style.css" ] && [ -f "app.js" ]; then
+          echo "✅ Todos los archivos existen correctamente"
+        else
+          echo "❌ Faltan archivos necesarios"
+          exit 1
+        fi
+    
+    - name: Verificar sintaxis HTML
+      run: |
+        echo "Verificando estructura HTML..."
+        if grep -q "<!DOCTYPE html>" index.html; then
+          echo "✅ DOCTYPE HTML encontrado"
+        else
+          echo "❌ DOCTYPE HTML no encontrado"
+          exit 1
+        fi
+        if grep -q "<ul id=\"taskList\">" index.html; then
+          echo "✅ Lista de tareas encontrada"
+        else
+          echo "❌ Lista de tareas no encontrada"
+          exit 1
+        fi
+    
+    - name: Verificar funciones JavaScript
+      run: |
+        echo "Verificando funciones JS..."
+        if grep -q "function addTask()" app.js; then
+          echo "✅ Función addTask encontrada"
+        else
+          echo "❌ Función addTask no encontrada"
+          exit 1
+        fi
+        if grep -q "document.getElementById('addBtn')" app.js; then
+          echo "✅ Event listener encontrado"
+        else
+          echo "❌ Event listener no encontrado"
+          exit 1
+        fi
+    
+    - name: Verificar estilos CSS
+      run: |
+        echo "Verificando archivo CSS..."
+        if grep -q "background-color: #f2f2f2" style.css; then
+          echo "✅ Estilos CSS encontrados"
+        else
+          echo "❌ Estilos CSS no encontrados"
+          exit 1
+        fi
+    
+    - name: Verificar estructura de carpetas
+      run: |
+        if [ -d ".github/workflows" ]; then
+          echo "✅ Carpeta .github/workflows existe"
+        else
+          echo "❌ Carpeta .github/workflows no encontrada"
+          exit 1
+        fi
+    
+    - name: Mostrar resumen de verificación
+      run: |
+        echo "====================================="
+        echo "✅ TODAS LAS VALIDACIONES EXITOSAS"
+        echo "====================================="
+        echo "📁 Archivos encontrados:"
+        ls -la
+        echo "====================================="
